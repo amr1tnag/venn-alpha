@@ -1,0 +1,98 @@
+import { useEffect, useRef } from 'react';
+import { ImageBackground, View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '../../lib/theme';
+
+export default function Login() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+
+  const topOpacity = useRef(new Animated.Value(0)).current;
+  const topY       = useRef(new Animated.Value(-20)).current;
+  const bottomY    = useRef(new Animated.Value(40)).current;
+  const bottomOp   = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(topOpacity, { toValue: 1, duration: 700, delay: 100, useNativeDriver: true }),
+      Animated.spring(topY,       { toValue: 0, friction: 8, tension: 40, delay: 100, useNativeDriver: true }),
+      Animated.timing(bottomOp,   { toValue: 1, duration: 600, delay: 500, useNativeDriver: true }),
+      Animated.spring(bottomY,    { toValue: 0, friction: 8, tension: 40, delay: 500, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  return (
+    <ImageBackground source={require('../../assets/hero.jpeg')} style={styles.bg} resizeMode="cover">
+      {/* grain effect */}
+      <View style={styles.grain} />
+      {/* gradients */}
+      <View style={styles.topFade} />
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.35)', 'rgba(0,0,0,0.72)', 'rgba(0,0,0,0.92)']}
+        style={styles.bottomFade}
+      />
+
+      {/* top: logo + headline */}
+      <Animated.View style={[styles.top, { paddingTop: insets.top + 40 }, { opacity: topOpacity, transform: [{ translateY: topY }] }]}>
+        <View style={styles.logoWrap}>
+          <View style={[styles.circle, { backgroundColor: colors.blue, left: 0 }]} />
+          <View style={[styles.circle, { backgroundColor: colors.violet, right: 0, opacity: 0.92 }]} />
+        </View>
+        <Text style={styles.appName}>Venn</Text>
+        <Text style={styles.headline}>Find where your lives{'\n'}overlap.</Text>
+        <Text style={styles.tagline}>The flatmate app designed to be deleted.</Text>
+      </Animated.View>
+
+      {/* bottom: buttons */}
+      <Animated.View style={[styles.bottom, { paddingBottom: insets.bottom + 32 }, { opacity: bottomOp, transform: [{ translateY: bottomY }] }]}>
+        <TouchableOpacity
+          style={styles.primaryBtn}
+          onPress={() => router.push('/(auth)/signup')}
+          activeOpacity={0.85}
+        >
+          <LinearGradient colors={[colors.blue, colors.violet]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.gradientBtn}>
+            <Text style={styles.primaryBtnText}>Create account</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.ghostBtn}
+          onPress={() => router.push('/(auth)/signin')}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.ghostBtnText}>Sign in</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.legal}>
+          By tapping Create account or Sign in, you agree to our{' '}
+          <Text style={styles.legalLink}>Terms</Text>. Learn how we process your data in our{' '}
+          <Text style={styles.legalLink}>Privacy Policy</Text> and{' '}
+          <Text style={styles.legalLink}>Cookies Policy</Text>.
+        </Text>
+      </Animated.View>
+    </ImageBackground>
+  );
+}
+
+const styles = StyleSheet.create({
+  bg: { flex: 1, backgroundColor: '#000' },
+  grain: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.06)' },
+  topFade: { position: 'absolute', top: 0, left: 0, right: 0, height: '22%', backgroundColor: 'rgba(0,0,0,0.28)' },
+  bottomFade: { position: 'absolute', top: '42%', left: 0, right: 0, bottom: 0 },
+  top: { position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center', paddingHorizontal: 28, gap: 6, zIndex: 2 },
+  logoWrap: { width: 52, height: 34, position: 'relative', marginBottom: 4 },
+  circle: { position: 'absolute', top: 0, width: 34, height: 34, borderRadius: 17 },
+  appName: { fontFamily: 'SpaceGrotesk_600SemiBold', fontSize: 22, color: '#fff', letterSpacing: -0.4 },
+  headline: { fontFamily: 'SpaceGrotesk_700Bold', fontSize: 34, color: '#fff', textAlign: 'center', letterSpacing: -1.2, lineHeight: 40, marginTop: 2 },
+  tagline: { fontSize: 15, color: 'rgba(255,255,255,0.65)', textAlign: 'center', lineHeight: 22 },
+  bottom: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 28, gap: 12, zIndex: 2 },
+  primaryBtn: { borderRadius: 50, overflow: 'hidden' },
+  gradientBtn: { paddingVertical: 18, alignItems: 'center', borderRadius: 50 },
+  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '600', letterSpacing: -0.2 },
+  ghostBtn: { borderRadius: 50, paddingVertical: 18, alignItems: 'center', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.3)' },
+  ghostBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  legal: { fontSize: 11, color: 'rgba(255,255,255,0.35)', textAlign: 'center', lineHeight: 16 },
+  legalLink: { color: 'rgba(255,255,255,0.55)', textDecorationLine: 'underline' },
+});
