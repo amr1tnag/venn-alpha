@@ -242,9 +242,18 @@ function normaliseProfile(p) {
     pronouns: Array.isArray(p.pronouns) ? p.pronouns.join('/') : null,
     verified: false, active: null,
     photo: Array.isArray(p.photos) ? p.photos[0] : null,
+    photos: Array.isArray(p.photos) ? p.photos : [],
     area: Array.isArray(p.preferred_areas) ? p.preferred_areas[0] : null,
-    gender: p.gender ?? null, job: null,
-    flatPhoto: null, flatLabel: null, prompts: [],
+    preferred_areas: Array.isArray(p.preferred_areas) ? p.preferred_areas : [],
+    budget: p.budget ?? null,
+    gender: p.gender ?? null,
+    job: [p.job_title, p.job_company].filter(Boolean).join(' at ') || null,
+    job_title: p.job_title ?? null,
+    job_company: p.job_company ?? null,
+    education_school: p.education_school ?? null,
+    education_level: p.education_level ?? null,
+    flatPhoto: null, flatLabel: null,
+    prompts: Array.isArray(p.prompts) ? p.prompts : [],
   };
 }
 
@@ -691,7 +700,7 @@ export default function Feed() {
 
         const { data } = await supabase
           .from('profiles')
-          .select('id, name, birthday, gender, pronouns, preferred_areas, budget, photos')
+          .select('id, name, birthday, gender, pronouns, preferred_areas, budget, photos, prompts, job_title, job_company, education_school, education_level')
           .neq('id', uid)
           .eq('onboarding_done', true)
           .eq('user_type', 'seeking')
