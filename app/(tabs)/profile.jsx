@@ -861,7 +861,7 @@ export default function Profile() {
 
   function handleLogout() {
     if (Platform.OS === 'web') {
-      if (window.confirm('Are you sure you want to log out?')) supabase.auth.signOut();
+      supabase.auth.signOut();
     } else {
       Alert.alert('Log out', 'Are you sure you want to log out?', [
         { text: 'Cancel', style: 'cancel' },
