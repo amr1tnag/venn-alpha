@@ -70,10 +70,27 @@ export default function RootLayout() {
 
     if (!session) {
       if (!inAuth) router.replace('/(auth)/login');
-    } else if (!profileComplete) {
-      if (!inOnboarding) router.replace('/(onboarding)/name');
-    } else {
+      return;
+    }
+
+    if (profileComplete) {
       if (!inTabs) router.replace('/(tabs)/feed');
+      return;
+    }
+
+    // profileComplete is false in state — but if the user just finished onboarding
+    // and navigated to tabs, the DB may already have onboarding_done=true.
+    // Re-check before bouncing them back.
+    if (inTabs) {
+      supabase.from('profiles').select('onboarding_done').eq('id', session.user.id).single().then(({ data: p }) => {
+        if (p?.onboarding_done) {
+          setProfileComplete(true);
+        } else {
+          router.replace('/(onboarding)/name');
+        }
+      });
+    } else if (!inOnboarding) {
+      router.replace('/(onboarding)/name');
     }
   }, [ready, session, profileComplete, segments]);
 
