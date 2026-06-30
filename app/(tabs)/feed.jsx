@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, Image, Modal, Pressable, Dimensions, TextInput, Animated,
@@ -620,6 +621,36 @@ export default function Feed() {
     setBannerDismissed(true);
     savePrefsToSupabase(updated);
   }
+
+  useFocusEffect(useCallback(() => {
+    async function reloadPrefs() {
+      const { data: authData } = await supabase.auth.getUser();
+      const uid = authData?.user?.id;
+      if (!uid) return;
+      const { data: me } = await supabase
+        .from('profiles')
+        .select('pref_role,pref_areas,pref_flat_type,pref_budget,pref_move_in,pref_gender,pref_age,pref_occupation,pref_food,pref_smoking,pref_drinking,pref_pets')
+        .eq('id', uid)
+        .single();
+      if (me) {
+        setPrefs({
+          role:       me.pref_role       ?? null,
+          areas:      me.pref_areas      ?? [],
+          flatType:   me.pref_flat_type  ?? [],
+          budget:     me.pref_budget     ?? null,
+          moveIn:     me.pref_move_in    ?? null,
+          gender:     me.pref_gender     ?? null,
+          age:        me.pref_age        ?? null,
+          occupation: me.pref_occupation ?? [],
+          food:       me.pref_food       ?? [],
+          smoking:    me.pref_smoking    ?? null,
+          drinking:   me.pref_drinking   ?? null,
+          pets:       me.pref_pets       ?? [],
+        });
+      }
+    }
+    reloadPrefs();
+  }, []));
 
   useEffect(() => {
     async function load() {
