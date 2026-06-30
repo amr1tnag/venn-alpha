@@ -860,10 +860,14 @@ export default function Profile() {
   }
 
   function handleLogout() {
-    Alert.alert('Log out', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Log out', style: 'destructive', onPress: () => supabase.auth.signOut() },
-    ]);
+    if (Platform.OS === 'web') {
+      if (window.confirm('Are you sure you want to log out?')) supabase.auth.signOut();
+    } else {
+      Alert.alert('Log out', 'Are you sure you want to log out?', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Log out', style: 'destructive', onPress: () => supabase.auth.signOut() },
+      ]);
+    }
   }
 
   const name = profile?.name ?? 'You';
