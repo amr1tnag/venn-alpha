@@ -306,9 +306,8 @@ export default function Likes() {
         <View style={s.center}><Text style={s.grayText}>Loading...</Text></View>
       ) : likes.length === 0 ? (
         <View style={s.center}>
-          <EmptyIllustration />
-          <Text style={s.emptyTitle}>{"Complete your profile\nto start getting likes"}</Text>
-          <Text style={s.emptySub}>Once your flatmate preferences are set, people who match will start liking you here.</Text>
+          <Text style={s.emptyTitle}>{"Have patience —\nsomeone's checking you out"}</Text>
+          <Text style={s.emptySub}>Your profile is out there. When someone likes you, they'll show up here.</Text>
           <TouchableOpacity style={s.setPrefBtn} onPress={() => setShowPrefs(true)} activeOpacity={0.85}>
             <Text style={s.setPrefText}>Set preferences</Text>
           </TouchableOpacity>
