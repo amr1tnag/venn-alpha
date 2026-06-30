@@ -308,9 +308,11 @@ export default function Likes() {
         <View style={s.center}>
           <Text style={s.emptyTitle}>{"Have patience —\nsomeone's checking you out"}</Text>
           <Text style={s.emptySub}>Your profile is out there. When someone likes you, they'll show up here.</Text>
-          <TouchableOpacity style={s.setPrefBtn} onPress={() => setShowPrefs(true)} activeOpacity={0.85}>
-            <Text style={s.setPrefText}>Set preferences</Text>
-          </TouchableOpacity>
+          {!Object.values(prefs).some(v => Array.isArray(v) ? v.length > 0 : !!v) && (
+            <TouchableOpacity style={s.setPrefBtn} onPress={() => setShowPrefs(true)} activeOpacity={0.85}>
+              <Text style={s.setPrefText}>Set preferences</Text>
+            </TouchableOpacity>
+          )}
         </View>
       ) : (
         <Animated.View style={{ flex: 1, opacity: gridFade }}>
