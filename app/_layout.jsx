@@ -135,7 +135,9 @@ export default function RootLayout() {
 
   return (
     <>
-      <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }} />
+      <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+        <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
+      </Stack>
       {!ready && (
         <View style={s.splash}>
           <View style={s.logoWrap}>
