@@ -9,6 +9,7 @@ import { colors } from '../../lib/theme';
 export default function EmailSignIn() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -24,15 +25,16 @@ export default function EmailSignIn() {
 
   async function handleSend() {
     setLoading(true);
+    setError('');
     try {
       const { error } = await supabase.auth.signInWithOtp({ email });
       if (error) {
-        Alert.alert('Error', error.message);
+        setError(error.message);
       } else {
         router.push(`/(auth)/email-otp?email=${encodeURIComponent(email)}`);
       }
     } catch (e) {
-      Alert.alert('Error', e.message || 'Something went wrong. Check your connection.');
+      setError(e.message || 'Something went wrong. Check your connection.');
     } finally {
       setLoading(false);
     }
@@ -69,6 +71,7 @@ export default function EmailSignIn() {
       </Animated.View>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 24 }]}>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
         <TouchableOpacity
           style={[styles.btn, !valid && styles.btnDisabled]}
           onPress={handleSend}
@@ -100,4 +103,5 @@ const styles = StyleSheet.create({
   btnDisabled: { opacity: 0.32 },
   gradientBtn: { paddingVertical: 18, alignItems: 'center', borderRadius: 50 },
   btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  errorText: { color: '#e02020', fontSize: 13, marginBottom: 10, textAlign: 'center' },
 });
