@@ -120,28 +120,28 @@ function ProfileOverlay({ like, visible, onClose, onPass, onLike }) {
             {/* Name + age */}
             <Text style={s.overlayName}>{profile.name}{age ? `, ${age}` : ''}</Text>
 
-            {/* Info chips */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {profile.gender ? <View style={s.chip}><Text style={s.chipText}>👤 {profile.gender}</Text></View> : null}
-              {profile.budget ? <View style={s.chip}><Text style={s.chipText}>💰 {profile.budget}</Text></View> : null}
-              {Array.isArray(profile.preferred_areas) && profile.preferred_areas.length > 0 && (
-                <View style={s.chip}><Text style={s.chipText}>📍 {profile.preferred_areas.join(', ')}</Text></View>
-              )}
+            {/* Info card — chips + work/education */}
+            <View style={s.infoCard}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: (profile.job_title || profile.job_company || profile.education_school || profile.education_level) ? 12 : 0 }}>
+                {profile.gender ? <View style={s.chip}><Text style={s.chipText}>👤 {profile.gender}</Text></View> : null}
+                {profile.budget ? <View style={s.chip}><Text style={s.chipText}>💰 {profile.budget}</Text></View> : null}
+                {Array.isArray(profile.preferred_areas) && profile.preferred_areas.length > 0 && (
+                  <View style={s.chip}><Text style={s.chipText}>📍 {profile.preferred_areas.join(', ')}</Text></View>
+                )}
+              </View>
+              {(profile.job_title || profile.job_company) ? (
+                <View style={[s.infoRow, { marginBottom: 6 }]}>
+                  <Ionicons name="briefcase-outline" size={15} color="#9AA0B2" />
+                  <Text style={s.infoText}>{[profile.job_title, profile.job_company].filter(Boolean).join(' at ')}</Text>
+                </View>
+              ) : null}
+              {(profile.education_school || profile.education_level) ? (
+                <View style={s.infoRow}>
+                  <Ionicons name="school-outline" size={15} color="#9AA0B2" />
+                  <Text style={s.infoText}>{[profile.education_school, profile.education_level].filter(Boolean).join(' · ')}</Text>
+                </View>
+              ) : null}
             </View>
-
-            {/* Work & Education */}
-            {(profile.job_title || profile.job_company) ? (
-              <View style={s.infoRow}>
-                <Ionicons name="briefcase-outline" size={15} color="#9AA0B2" />
-                <Text style={s.infoText}>{[profile.job_title, profile.job_company].filter(Boolean).join(' at ')}</Text>
-              </View>
-            ) : null}
-            {(profile.education_school || profile.education_level) ? (
-              <View style={s.infoRow}>
-                <Ionicons name="school-outline" size={15} color="#9AA0B2" />
-                <Text style={s.infoText}>{[profile.education_school, profile.education_level].filter(Boolean).join(' · ')}</Text>
-              </View>
-            ) : null}
 
             {/* Prompts */}
             {Array.isArray(profile.prompts) && profile.prompts.map((pr, i) => (
@@ -421,7 +421,8 @@ const s = StyleSheet.create({
   commentLabel: { fontFamily: 'HankenGrotesk_600SemiBold', fontSize: 11, color: '#9AA0B2', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 },
   commentText: { fontFamily: 'HankenGrotesk_400Regular', fontSize: 15, color: colors.ink, lineHeight: 22 },
 
-  chip: { backgroundColor: '#F2F3F7', borderRadius: 50, paddingHorizontal: 12, paddingVertical: 6 },
+  infoCard: { backgroundColor: '#F8F9FF', borderRadius: 16, padding: 14, borderWidth: 1, borderColor: '#EDEEF2' },
+  chip: { backgroundColor: '#fff', borderRadius: 50, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: '#E6E8EE' },
   chipText: { fontFamily: 'HankenGrotesk_600SemiBold', fontSize: 13, color: colors.ink },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   infoText: { fontFamily: 'HankenGrotesk_400Regular', fontSize: 14, color: '#5A6072' },
