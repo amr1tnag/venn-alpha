@@ -20,9 +20,9 @@ const DEMO_MESSAGES = [
 export default function Chat() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { name, matchId, photo } = useLocalSearchParams();
+  const { name, matchId, photo, prefill } = useLocalSearchParams();
   const [messages, setMessages] = useState(DEMO_MESSAGES);
-  const [text, setText] = useState('');
+  const [text, setText] = useState(prefill ?? '');
   const scrollRef = useRef(null);
   const displayName = name ?? 'Chat';
   const sendScale = useRef(new Animated.Value(1)).current;

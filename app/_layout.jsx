@@ -152,7 +152,7 @@ export default function RootLayout() {
         onChat={() => {
           const d = incomingMatch;
           setIncomingMatch(null);
-          router.push({ pathname: '/(tabs)/chat', params: { name: d.name, matchId: d.matchId } });
+          router.push({ pathname: '/(tabs)/chat', params: { name: d.name, matchId: d.matchId, prefill: `Hey ${d.name}! Really excited to match with you on Venn 👋 Still looking for a flatmate?` } });
         }}
         onDismiss={() => setIncomingMatch(null)}
       />

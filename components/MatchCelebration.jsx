@@ -88,8 +88,8 @@ export default function MatchCelebration({ visible, matchedName, matchedPhoto, o
             </View>
           </View>
 
-          {/* Send a message — always shown */}
-          <TouchableOpacity onPress={onChat} activeOpacity={0.85} style={{ width: '100%', marginBottom: 16 }}>
+          {/* Send a message */}
+          <TouchableOpacity onPress={onChat} activeOpacity={0.85} style={{ width: '100%' }}>
             <LinearGradient
               colors={['#335CFF', '#8A5BFF']}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
@@ -97,10 +97,6 @@ export default function MatchCelebration({ visible, matchedName, matchedPhoto, o
             >
               <Text style={ms.btnPrimaryText}>Send a message</Text>
             </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={onDismiss} activeOpacity={0.6}>
-            <Text style={ms.dismiss}>Maybe later</Text>
           </TouchableOpacity>
         </Pressable>
       </Pressable>
@@ -123,5 +119,4 @@ const ms = StyleSheet.create({
   heartCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#335CFF', alignItems: 'center', justifyContent: 'center', zIndex: 1, marginHorizontal: -8 },
   btnPrimary: { borderRadius: 50, paddingVertical: 16, alignItems: 'center', width: '100%' },
   btnPrimaryText: { fontFamily: 'SpaceGrotesk_700Bold', fontSize: 16, color: '#fff' },
-  dismiss: { fontFamily: 'HankenGrotesk_400Regular', fontSize: 14, color: 'rgba(255,255,255,0.4)', textAlign: 'center' },
 });
