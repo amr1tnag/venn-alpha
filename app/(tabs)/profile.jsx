@@ -86,7 +86,8 @@ function calcCompletion(profile) {
     if (Array.isArray(v)) return v.length > 0;
     return !!v;
   }).length;
-  return Math.round((done / fields.length) * 100);
+  const hasWorkEdu = !!(profile.job_company || profile.job_title || profile.education_school || profile.education_level);
+  return Math.round(((done + (hasWorkEdu ? 1 : 0)) / (fields.length + 1)) * 100);
 }
 
 // ─── Ring avatar ──────────────────────────────────────────────────────────────
