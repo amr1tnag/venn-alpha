@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { ImageBackground, View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { ImageBackground, View, Text, TouchableOpacity, StyleSheet, Animated, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -55,7 +55,7 @@ export default function SignIn() {
 }
 
 const styles = StyleSheet.create({
-  bg: { flex: 1, backgroundColor: '#111' },
+  bg: { flex: 1, backgroundColor: '#111', ...Platform.select({ web: { height: '100dvh', overflow: 'hidden' } }) },
   overlay: { position: 'absolute', top: '30%', left: 0, right: 0, bottom: 0 },
   back: { position: 'absolute', left: 24, zIndex: 10 },
   backCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
