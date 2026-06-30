@@ -257,6 +257,33 @@ function normaliseProfile(p) {
   };
 }
 
+function scoreProfile(profile, prefs) {
+  let matched = 0, total = 0;
+  if (prefs.areas && prefs.areas.length > 0) {
+    total++;
+    if (profile.preferred_areas.some(a => prefs.areas.includes(a))) matched++;
+  }
+  if (prefs.gender) {
+    total++;
+    if (!profile.gender || profile.gender === prefs.gender) matched++;
+  }
+  if (prefs.budget && profile.budget) {
+    total++;
+    if (prefs.budget === profile.budget) matched++;
+  }
+  if (total === 0) return 100;
+  return Math.round((matched / total) * 100);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 // ─── Match modal ──────────────────────────────────────────────────────────────
 
 function MatchModal({ visible, myName, myPhoto, theirName, theirPhoto, onMessage, onClose }) {
@@ -579,6 +606,7 @@ export default function Feed() {
   const [likeSending, setLikeSending] = useState(false);
   const uidRef = useRef(null);
   const myInfoRef = useRef({ name: null, photo: null });
+  const skippedRef = useRef([]);
 
   const profile = profiles[idx] ?? null;
   const canBack = idx > 0;
@@ -586,6 +614,19 @@ export default function Feed() {
 
   function next() { if (canNext) setIdx(i => i + 1); }
   function back() { if (canBack) setIdx(i => i - 1); }
+
+  function handleSkip() {
+    if (profile && !profile._demo) {
+      skippedRef.current = [...skippedRef.current, profile];
+    }
+    if (!canNext && skippedRef.current.length > 0) {
+      // Recycle skipped profiles back into the feed
+      const recycled = shuffle(skippedRef.current);
+      skippedRef.current = [];
+      setProfiles(prev => [...prev, ...recycled]);
+    }
+    setIdx(i => i + 1);
+  }
 
   function openLikeSheet(p) {
     setLikeComment('');
@@ -674,12 +715,13 @@ export default function Feed() {
           .select('name,photos,pref_role,pref_areas,pref_flat_type,pref_budget,pref_move_in,pref_gender,pref_age,pref_occupation,pref_food,pref_smoking,pref_drinking,pref_pets')
           .eq('id', uid)
           .single();
+        let currentPrefs = INIT_PREFS;
         if (me) {
           myInfoRef.current = {
             name: me.name ?? 'You',
             photo: Array.isArray(me.photos) ? me.photos[0] ?? null : null,
           };
-          const loaded = {
+          currentPrefs = {
             role:       me.pref_role     ?? null,
             areas:      me.pref_areas    ?? [],
             flatType:   me.pref_flat_type  ?? [],
@@ -693,8 +735,8 @@ export default function Feed() {
             drinking:   me.pref_drinking ?? null,
             pets:       me.pref_pets     ?? [],
           };
-          setPrefs(loaded);
-          const anySet = Object.values(loaded).some(v => Array.isArray(v) ? v.length > 0 : !!v);
+          setPrefs(currentPrefs);
+          const anySet = Object.values(currentPrefs).some(v => Array.isArray(v) ? v.length > 0 : !!v);
           if (anySet) setBannerDismissed(true);
         }
 
@@ -704,8 +746,14 @@ export default function Feed() {
           .neq('id', uid)
           .eq('onboarding_done', true)
           .eq('user_type', 'seeking')
-          .limit(20);
-        if (data && data.length > 0) setProfiles(data.map(normaliseProfile));
+          .limit(100);
+        if (data && data.length > 0) {
+          const normed = data.map(normaliseProfile);
+          const scored = normed
+            .map(p => ({ ...p, _score: scoreProfile(p, currentPrefs) }))
+            .sort((a, b) => b._score - a._score);
+          setProfiles(scored);
+        }
       } catch (_) {
         // keep demo profiles
       } finally {
@@ -812,7 +860,7 @@ export default function Feed() {
               profile={profile}
               onBack={back}
               canBack={canBack}
-              onSkip={next}
+              onSkip={handleSkip}
               onLike={() => openLikeSheet(profile)}
             />
           </ScrollView>
@@ -820,7 +868,7 @@ export default function Feed() {
           {/* Floating X skip */}
           <TouchableOpacity
             style={[s.skipBtn, { bottom: insets.bottom + 28 }]}
-            onPress={next}
+            onPress={handleSkip}
             activeOpacity={0.85}
           >
             <Ionicons name="close" size={26} color="#FF4D6A" />
@@ -828,7 +876,7 @@ export default function Feed() {
         </View>
       ) : (
         <View style={s.empty}>
-          <Text style={s.emptyText}>You've seen everyone for now!</Text>
+          <Text style={s.emptyText}>No profiles yet — check back soon!</Text>
         </View>
       )}
 

@@ -6,11 +6,13 @@ import { SpaceMono_400Regular } from '@expo-google-fonts/space-mono';
 import { HankenGrotesk_400Regular, HankenGrotesk_600SemiBold, HankenGrotesk_700Bold } from '@expo-google-fonts/hanken-grotesk';
 import { View, Text, StyleSheet } from 'react-native';
 import { supabase } from '../lib/supabase';
+import MatchCelebration from '../components/MatchCelebration';
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
   const [session, setSession] = useState(null);
   const [profileComplete, setProfileComplete] = useState(false);
+  const [incomingMatch, setIncomingMatch] = useState(null);
   const segments = useSegments();
   const router = useRouter();
 
@@ -63,6 +65,45 @@ export default function RootLayout() {
     return () => { subscription.unsubscribe(); clearTimeout(fallback); };
   }, []);
 
+  // Realtime: show match celebration when someone likes us back
+  useEffect(() => {
+    if (!session) return;
+    const uid = session.user.id;
+
+    const channel = supabase
+      .channel(`match-notify-${uid}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'likes', filter: `to_user_id=eq.${uid}` },
+        async (payload) => {
+          const fromId = payload.new.from_user_id;
+          // Only show celebration if we had previously liked them too (mutual)
+          const { data: prevLike } = await supabase
+            .from('likes').select('id').eq('from_user_id', uid).eq('to_user_id', fromId).maybeSingle();
+          if (!prevLike) return;
+
+          const { data: p } = await supabase
+            .from('profiles').select('name, photos').eq('id', fromId).single();
+          if (!p) return;
+
+          const u1 = uid < fromId ? uid : fromId;
+          const u2 = uid < fromId ? fromId : uid;
+          const { data: match } = await supabase
+            .from('matches').select('id').eq('user1_id', u1).eq('user2_id', u2).maybeSingle();
+
+          setIncomingMatch({
+            name: p.name,
+            photo: p.photos?.[0] ?? null,
+            matchId: match?.id ?? null,
+            userId: fromId,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [session]);
+
   useEffect(() => {
     if (!ready) return;
     const inAuth = segments[0] === '(auth)';
@@ -79,9 +120,6 @@ export default function RootLayout() {
       return;
     }
 
-    // profileComplete is false in state — but if the user just finished onboarding
-    // and navigated to tabs, the DB may already have onboarding_done=true.
-    // Re-check before bouncing them back.
     if (inTabs) {
       supabase.from('profiles').select('onboarding_done').eq('id', session.user.id).single().then(({ data: p }) => {
         if (p?.onboarding_done) {
@@ -107,6 +145,17 @@ export default function RootLayout() {
           <Text style={s.text}>Venn</Text>
         </View>
       )}
+      <MatchCelebration
+        visible={incomingMatch !== null}
+        matchedName={incomingMatch?.name}
+        matchedPhoto={incomingMatch?.photo}
+        onChat={() => {
+          const d = incomingMatch;
+          setIncomingMatch(null);
+          router.push({ pathname: '/(tabs)/chat', params: { name: d.name, matchId: d.matchId } });
+        }}
+        onDismiss={() => setIncomingMatch(null)}
+      />
     </>
   );
 }
