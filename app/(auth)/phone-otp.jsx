@@ -20,19 +20,19 @@ export default function PhoneOtp() {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: true }),
-      Animated.spring(slideY,  { toValue: 0, friction: 9, tension: 55, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: false }),
+      Animated.spring(slideY,  { toValue: 0, friction: 9, tension: 55, useNativeDriver: false }),
     ]).start();
   }, []);
 
   function shake() {
     shakeX.setValue(0);
     Animated.sequence([
-      Animated.timing(shakeX, { toValue: -10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeX, { toValue:  10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeX, { toValue:  -8, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeX, { toValue:   8, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeX, { toValue:   0, duration: 40, useNativeDriver: true }),
+      Animated.timing(shakeX, { toValue: -10, duration: 50, useNativeDriver: false }),
+      Animated.timing(shakeX, { toValue:  10, duration: 50, useNativeDriver: false }),
+      Animated.timing(shakeX, { toValue:  -8, duration: 50, useNativeDriver: false }),
+      Animated.timing(shakeX, { toValue:   8, duration: 50, useNativeDriver: false }),
+      Animated.timing(shakeX, { toValue:   0, duration: 40, useNativeDriver: false }),
     ]).start();
   }
 

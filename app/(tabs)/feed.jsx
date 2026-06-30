@@ -53,8 +53,8 @@ function QuickFilterSheet({ rowKey, visible, prefs, onClose, onSave }) {
       setOtherInput('');
       setShowOther(false);
       Animated.parallel([
-        Animated.timing(backdropOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
-        Animated.spring(sheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: true }),
+        Animated.timing(backdropOpacity, { toValue: 1, duration: 250, useNativeDriver: false }),
+        Animated.spring(sheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: false }),
       ]).start();
     } else {
       backdropOpacity.setValue(0);
@@ -64,8 +64,8 @@ function QuickFilterSheet({ rowKey, visible, prefs, onClose, onSave }) {
 
   function animateClose() {
     Animated.parallel([
-      Animated.timing(backdropOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
-      Animated.timing(sheetY, { toValue: 600, duration: 220, useNativeDriver: true }),
+      Animated.timing(backdropOpacity, { toValue: 0, duration: 200, useNativeDriver: false }),
+      Animated.timing(sheetY, { toValue: 600, duration: 220, useNativeDriver: false }),
     ]).start(() => onClose());
   }
 
@@ -271,21 +271,21 @@ function MatchModal({ visible, myName, myPhoto, theirName, theirPhoto, onMessage
     pulse.setValue(1);
 
     Animated.sequence([
-      Animated.timing(fade, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.timing(fade, { toValue: 1, duration: 300, useNativeDriver: false }),
       Animated.parallel([
-        Animated.spring(leftX,  { toValue: 0, friction: 7, tension: 50, useNativeDriver: true }),
-        Animated.spring(rightX, { toValue: 0, friction: 7, tension: 50, useNativeDriver: true }),
+        Animated.spring(leftX,  { toValue: 0, friction: 7, tension: 50, useNativeDriver: false }),
+        Animated.spring(rightX, { toValue: 0, friction: 7, tension: 50, useNativeDriver: false }),
       ]),
       Animated.parallel([
-        Animated.timing(textOp, { toValue: 1, duration: 350, useNativeDriver: true }),
-        Animated.spring(textY,  { toValue: 0, friction: 9, useNativeDriver: true }),
+        Animated.timing(textOp, { toValue: 1, duration: 350, useNativeDriver: false }),
+        Animated.spring(textY,  { toValue: 0, friction: 9, useNativeDriver: false }),
       ]),
     ]).start();
 
     loopRef.current = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 1.18, duration: 1000, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1,    duration: 1000, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1.18, duration: 1000, useNativeDriver: false }),
+        Animated.timing(pulse, { toValue: 1,    duration: 1000, useNativeDriver: false }),
       ])
     );
     loopRef.current.start();
@@ -404,7 +404,7 @@ function ProfileCard({ profile, onBack, canBack, onSkip, onLike }) {
   const fadeIn = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     fadeIn.setValue(0);
-    Animated.timing(fadeIn, { toValue: 1, duration: 280, useNativeDriver: true }).start();
+    Animated.timing(fadeIn, { toValue: 1, duration: 280, useNativeDriver: false }).start();
   }, [profile.id]);
 
   return (

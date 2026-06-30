@@ -17,8 +17,8 @@ export default function OnboardingShell({ step, total, children, footer }) {
     slideX.setValue(32);
     opacity.setValue(0);
     Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration: 260, useNativeDriver: true }),
-      Animated.spring(slideX,  { toValue: 0, friction: 9, tension: 60, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 1, duration: 260, useNativeDriver: false }),
+      Animated.spring(slideX,  { toValue: 0, friction: 9, tension: 60, useNativeDriver: false }),
     ]).start();
   }, [step]);
 

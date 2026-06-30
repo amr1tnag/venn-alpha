@@ -227,7 +227,7 @@ export default function Likes() {
       } catch (_) {}
       finally {
         setLoading(false);
-        Animated.timing(gridFade, { toValue: 1, duration: 350, useNativeDriver: true }).start();
+        Animated.timing(gridFade, { toValue: 1, duration: 350, useNativeDriver: false }).start();
       }
     }
     load();

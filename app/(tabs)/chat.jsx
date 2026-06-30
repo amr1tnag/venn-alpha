@@ -29,8 +29,8 @@ export default function Chat() {
 
   function animateSend() {
     Animated.sequence([
-      Animated.spring(sendScale, { toValue: 0.82, friction: 8, useNativeDriver: true }),
-      Animated.spring(sendScale, { toValue: 1,    friction: 8, useNativeDriver: true }),
+      Animated.spring(sendScale, { toValue: 0.82, friction: 8, useNativeDriver: false }),
+      Animated.spring(sendScale, { toValue: 1,    friction: 8, useNativeDriver: false }),
     ]).start();
   }
 

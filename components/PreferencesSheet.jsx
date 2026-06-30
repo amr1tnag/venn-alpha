@@ -128,8 +128,8 @@ export default function PreferencesSheet({ visible, onClose, prefs, onSave }) {
     if (visible) {
       setDraft(prefs); setOpenKey(null); setOtherInput(''); setShowOther(false);
       Animated.parallel([
-        Animated.timing(backdropOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
-        Animated.spring(sheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: true }),
+        Animated.timing(backdropOpacity, { toValue: 1, duration: 250, useNativeDriver: false }),
+        Animated.spring(sheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: false }),
       ]).start();
     } else {
       backdropOpacity.setValue(0);
@@ -139,8 +139,8 @@ export default function PreferencesSheet({ visible, onClose, prefs, onSave }) {
 
   function animateClose() {
     Animated.parallel([
-      Animated.timing(backdropOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
-      Animated.timing(sheetY, { toValue: 600, duration: 220, useNativeDriver: true }),
+      Animated.timing(backdropOpacity, { toValue: 0, duration: 200, useNativeDriver: false }),
+      Animated.timing(sheetY, { toValue: 600, duration: 220, useNativeDriver: false }),
     ]).start(() => onClose());
   }
 

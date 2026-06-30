@@ -16,10 +16,10 @@ export default function Login() {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(topOpacity, { toValue: 1, duration: 700, delay: 100, useNativeDriver: true }),
-      Animated.spring(topY,       { toValue: 0, friction: 8, tension: 40, delay: 100, useNativeDriver: true }),
-      Animated.timing(bottomOp,   { toValue: 1, duration: 600, delay: 500, useNativeDriver: true }),
-      Animated.spring(bottomY,    { toValue: 0, friction: 8, tension: 40, delay: 500, useNativeDriver: true }),
+      Animated.timing(topOpacity, { toValue: 1, duration: 700, delay: 100, useNativeDriver: false }),
+      Animated.spring(topY,       { toValue: 0, friction: 8, tension: 40, delay: 100, useNativeDriver: false }),
+      Animated.timing(bottomOp,   { toValue: 1, duration: 600, delay: 500, useNativeDriver: false }),
+      Animated.spring(bottomY,    { toValue: 0, friction: 8, tension: 40, delay: 500, useNativeDriver: false }),
     ]).start();
   }, []);
 

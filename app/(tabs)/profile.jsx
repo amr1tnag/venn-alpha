@@ -159,8 +159,8 @@ function WorkEduSheet({ visible, profile, onSave, onClose }) {
   useEffect(() => {
     if (visible) {
       Animated.parallel([
-        Animated.timing(backdropOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
-        Animated.spring(sheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: true }),
+        Animated.timing(backdropOpacity, { toValue: 1, duration: 250, useNativeDriver: false }),
+        Animated.spring(sheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: false }),
       ]).start();
     } else {
       backdropOpacity.setValue(0);
@@ -170,8 +170,8 @@ function WorkEduSheet({ visible, profile, onSave, onClose }) {
 
   function animateClose() {
     Animated.parallel([
-      Animated.timing(backdropOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
-      Animated.timing(sheetY, { toValue: 600, duration: 220, useNativeDriver: true }),
+      Animated.timing(backdropOpacity, { toValue: 0, duration: 200, useNativeDriver: false }),
+      Animated.timing(sheetY, { toValue: 600, duration: 220, useNativeDriver: false }),
     ]).start(() => onClose());
   }
 
@@ -275,8 +275,8 @@ function PromptSheet({ visible, editingPrompt, onSave, onDelete, onClose }) {
   useEffect(() => {
     if (visible) {
       Animated.parallel([
-        Animated.timing(backdropOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
-        Animated.spring(sheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: true }),
+        Animated.timing(backdropOpacity, { toValue: 1, duration: 250, useNativeDriver: false }),
+        Animated.spring(sheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: false }),
       ]).start();
     } else {
       backdropOpacity.setValue(0);
@@ -286,8 +286,8 @@ function PromptSheet({ visible, editingPrompt, onSave, onDelete, onClose }) {
 
   function animateClose() {
     Animated.parallel([
-      Animated.timing(backdropOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
-      Animated.timing(sheetY, { toValue: 600, duration: 220, useNativeDriver: true }),
+      Animated.timing(backdropOpacity, { toValue: 0, duration: 200, useNativeDriver: false }),
+      Animated.timing(sheetY, { toValue: 600, duration: 220, useNativeDriver: false }),
     ]).start(() => onClose());
   }
 
@@ -632,8 +632,8 @@ function PreferencesSheet({ visible, profile, onSave, onClose }) {
   useEffect(() => {
     if (visible) {
       Animated.parallel([
-        Animated.timing(backdropOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
-        Animated.spring(sheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: true }),
+        Animated.timing(backdropOpacity, { toValue: 1, duration: 250, useNativeDriver: false }),
+        Animated.spring(sheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: false }),
       ]).start();
     } else {
       backdropOpacity.setValue(0);
@@ -643,8 +643,8 @@ function PreferencesSheet({ visible, profile, onSave, onClose }) {
 
   function animateClose() {
     Animated.parallel([
-      Animated.timing(backdropOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
-      Animated.timing(sheetY, { toValue: 600, duration: 220, useNativeDriver: true }),
+      Animated.timing(backdropOpacity, { toValue: 0, duration: 200, useNativeDriver: false }),
+      Animated.timing(sheetY, { toValue: 600, duration: 220, useNativeDriver: false }),
     ]).start(() => onClose());
   }
 
@@ -744,8 +744,8 @@ export default function Profile() {
   useEffect(() => {
     if (settingsSheet) {
       Animated.parallel([
-        Animated.timing(settingsBackdrop, { toValue: 1, duration: 250, useNativeDriver: true }),
-        Animated.spring(settingsSheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: true }),
+        Animated.timing(settingsBackdrop, { toValue: 1, duration: 250, useNativeDriver: false }),
+        Animated.spring(settingsSheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: false }),
       ]).start();
     } else {
       settingsBackdrop.setValue(0);
@@ -755,8 +755,8 @@ export default function Profile() {
 
   function animateSettingsClose() {
     Animated.parallel([
-      Animated.timing(settingsBackdrop, { toValue: 0, duration: 200, useNativeDriver: true }),
-      Animated.timing(settingsSheetY, { toValue: 600, duration: 220, useNativeDriver: true }),
+      Animated.timing(settingsBackdrop, { toValue: 0, duration: 200, useNativeDriver: false }),
+      Animated.timing(settingsSheetY, { toValue: 600, duration: 220, useNativeDriver: false }),
     ]).start(() => setSettingsSheet(false));
   }
   const scrollRef = useRef(null);

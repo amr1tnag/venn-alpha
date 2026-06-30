@@ -18,8 +18,8 @@ export default function EmailSignIn() {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: true }),
-      Animated.spring(slideY,  { toValue: 0, friction: 9, tension: 55, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: false }),
+      Animated.spring(slideY,  { toValue: 0, friction: 9, tension: 55, useNativeDriver: false }),
     ]).start();
   }, []);
 

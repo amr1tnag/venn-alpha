@@ -14,8 +14,8 @@ export default function SignUp() {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration: 500, delay: 150, useNativeDriver: true }),
-      Animated.spring(slideY,  { toValue: 0, friction: 8, tension: 45, delay: 150, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 1, duration: 500, delay: 150, useNativeDriver: false }),
+      Animated.spring(slideY,  { toValue: 0, friction: 8, tension: 45, delay: 150, useNativeDriver: false }),
     ]).start();
   }, []);
 

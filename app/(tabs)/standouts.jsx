@@ -129,8 +129,8 @@ export default function Standouts() {
   useEffect(() => {
     if (showKeySheet) {
       Animated.parallel([
-        Animated.timing(keySheetBackdrop, { toValue: 1, duration: 250, useNativeDriver: true }),
-        Animated.spring(keySheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: true }),
+        Animated.timing(keySheetBackdrop, { toValue: 1, duration: 250, useNativeDriver: false }),
+        Animated.spring(keySheetY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: false }),
       ]).start();
     } else {
       keySheetBackdrop.setValue(0);
@@ -141,8 +141,8 @@ export default function Standouts() {
   useEffect(() => {
     if (showKeysInfo) {
       Animated.parallel([
-        Animated.timing(keysInfoBackdrop, { toValue: 1, duration: 250, useNativeDriver: true }),
-        Animated.spring(keysInfoY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: true }),
+        Animated.timing(keysInfoBackdrop, { toValue: 1, duration: 250, useNativeDriver: false }),
+        Animated.spring(keysInfoY, { toValue: 0, friction: 10, tension: 60, useNativeDriver: false }),
       ]).start();
     } else {
       keysInfoBackdrop.setValue(0);
@@ -152,15 +152,15 @@ export default function Standouts() {
 
   function animateCloseKeySheet() {
     Animated.parallel([
-      Animated.timing(keySheetBackdrop, { toValue: 0, duration: 200, useNativeDriver: true }),
-      Animated.timing(keySheetY, { toValue: 600, duration: 220, useNativeDriver: true }),
+      Animated.timing(keySheetBackdrop, { toValue: 0, duration: 200, useNativeDriver: false }),
+      Animated.timing(keySheetY, { toValue: 600, duration: 220, useNativeDriver: false }),
     ]).start(() => setShowKeySheet(false));
   }
 
   function animateCloseKeysInfo() {
     Animated.parallel([
-      Animated.timing(keysInfoBackdrop, { toValue: 0, duration: 200, useNativeDriver: true }),
-      Animated.timing(keysInfoY, { toValue: 600, duration: 220, useNativeDriver: true }),
+      Animated.timing(keysInfoBackdrop, { toValue: 0, duration: 200, useNativeDriver: false }),
+      Animated.timing(keysInfoY, { toValue: 600, duration: 220, useNativeDriver: false }),
     ]).start(() => setShowKeysInfo(false));
   }
 
@@ -238,7 +238,7 @@ export default function Standouts() {
     Animated.timing(pan, {
       toValue: { x: swipeDir, y: 0 },
       duration: 300,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start(() => {
       pan.setValue({ x: 0, y: 0 });
       nopeOpacity.setValue(0);
@@ -265,7 +265,7 @@ export default function Standouts() {
         } else if (gs.dx < -90) {
           advanceCard(false);
         } else {
-          Animated.spring(pan, { toValue: { x: 0, y: 0 }, useNativeDriver: true }).start();
+          Animated.spring(pan, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start();
           nopeOpacity.setValue(0);
           roseOpacity.setValue(0);
           if (wasTap) setShowProfile(true);
