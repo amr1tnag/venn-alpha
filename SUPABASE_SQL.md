@@ -115,13 +115,47 @@ CREATE POLICY "messages_insert" ON messages
 
 ---
 
-## 5. Auto-match trigger
+## 5. Notifications table
 
-When two users both like each other, this trigger creates a match automatically.
+```sql
+CREATE TABLE IF NOT EXISTS notifications (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  type        text NOT NULL, -- 'like' | 'match' | 'message'
+  actor_id    uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  match_id    uuid REFERENCES matches(id) ON DELETE CASCADE,
+  content     text,
+  read        boolean NOT NULL DEFAULT false,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+
+-- Users can only see their own notifications
+CREATE POLICY "notifications_select_own" ON notifications
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- Users can only mark their own notifications as read
+CREATE POLICY "notifications_update_own" ON notifications
+  FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+```
+
+Notifications are written server-side by the triggers below (`SECURITY DEFINER`),
+not inserted directly by the client, so no `INSERT` policy is needed.
+
+---
+
+## 6. Auto-match trigger + notifications
+
+When two users both like each other, this trigger creates a match automatically,
+and writes a `notifications` row for a like, a match, or (via a second trigger
+below) a new message. Requires the `notifications` table above to exist first.
 
 ```sql
 CREATE OR REPLACE FUNCTION create_match_on_mutual_like()
 RETURNS TRIGGER AS $$
+DECLARE
+  m_id uuid;
 BEGIN
   -- Check if the person being liked has already liked back
   IF EXISTS (
@@ -132,7 +166,23 @@ BEGIN
     -- Insert a match (use least/greatest so (A,B) and (B,A) produce same row)
     INSERT INTO matches (user1_id, user2_id)
     VALUES (LEAST(NEW.from_user_id, NEW.to_user_id), GREATEST(NEW.from_user_id, NEW.to_user_id))
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (user1_id, user2_id) DO NOTHING
+    RETURNING id INTO m_id;
+
+    IF m_id IS NULL THEN
+      SELECT id INTO m_id FROM matches
+        WHERE user1_id = LEAST(NEW.from_user_id, NEW.to_user_id)
+          AND user2_id = GREATEST(NEW.from_user_id, NEW.to_user_id);
+    END IF;
+
+    INSERT INTO notifications (user_id, type, actor_id, match_id)
+    VALUES (NEW.to_user_id, 'match', NEW.from_user_id, m_id);
+    INSERT INTO notifications (user_id, type, actor_id, match_id)
+    VALUES (NEW.from_user_id, 'match', NEW.to_user_id, m_id);
+  ELSE
+    -- One-way like — notify the recipient only
+    INSERT INTO notifications (user_id, type, actor_id)
+    VALUES (NEW.to_user_id, 'like', NEW.from_user_id);
   END IF;
   RETURN NEW;
 END;
@@ -144,9 +194,33 @@ CREATE TRIGGER trg_mutual_like
   FOR EACH ROW EXECUTE FUNCTION create_match_on_mutual_like();
 ```
 
+```sql
+CREATE OR REPLACE FUNCTION notify_on_message()
+RETURNS TRIGGER AS $$
+DECLARE
+  recipient uuid;
+BEGIN
+  SELECT CASE WHEN user1_id = NEW.sender_id THEN user2_id ELSE user1_id END
+    INTO recipient
+  FROM matches WHERE id = NEW.match_id;
+
+  IF recipient IS NOT NULL THEN
+    INSERT INTO notifications (user_id, type, actor_id, match_id, content)
+    VALUES (recipient, 'message', NEW.sender_id, NEW.match_id, NEW.content);
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trg_notify_message ON messages;
+CREATE TRIGGER trg_notify_message
+  AFTER INSERT ON messages
+  FOR EACH ROW EXECUTE FUNCTION notify_on_message();
+```
+
 ---
 
-## 6. Storage bucket for photos
+## 7. Storage bucket for photos
 
 Run in Supabase **Dashboard → Storage → New bucket**:
 - Name: `photos`
@@ -166,7 +240,7 @@ CREATE POLICY "photos are public" ON storage.objects
 
 ---
 
-## 7. Verified badge column
+## 8. Verified badge column
 
 ```sql
 ALTER TABLE profiles
@@ -175,7 +249,7 @@ ALTER TABLE profiles
 
 ---
 
-## 8. Reports table
+## 9. Reports table
 
 ```sql
 CREATE TABLE IF NOT EXISTS reports (
@@ -200,7 +274,7 @@ CREATE POLICY "reports_insert" ON reports
 
 ---
 
-## 9. Blocks table
+## 10. Blocks table
 
 ```sql
 CREATE TABLE IF NOT EXISTS blocks (
@@ -245,7 +319,7 @@ Call it from the client with `supabase.rpc('get_blocked_pair_ids')`.
 
 ---
 
-## 10. Realtime (optional – for live chat)
+## 11. Realtime (optional – for live chat)
 
 Enable realtime on the messages table in Supabase Dashboard:
 **Database → Replication → Tables → enable `messages`**

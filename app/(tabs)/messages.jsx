@@ -8,6 +8,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 import { colors } from '../../lib/theme';
 import { getBlockedIds } from '../../lib/blocks';
+import { getUnreadCount } from '../../lib/notifications';
 
 const DEMO_NEW = [
   { id: 'n1', name: 'Kavya', photo: null },
@@ -47,7 +48,7 @@ export default function Messages() {
   const [yourTurn, setYourTurn] = useState(DEMO_YOUR_TURN);
   const [theirTurn, setTheirTurn] = useState(DEMO_THEIR_TURN);
   const [loading, setLoading] = useState(true);
-  const [hasUnread] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
   const hasLoadedOnce = useRef(false);
 
   useFocusEffect(useCallback(() => {
@@ -57,6 +58,8 @@ export default function Messages() {
         const { data: authData } = await supabase.auth.getUser();
         const uid = authData?.user?.id;
         if (!uid) return;
+
+        getUnreadCount(uid).then(count => setHasUnread(count > 0));
 
         const { data: matchRows } = await supabase
           .from('matches')
@@ -158,8 +161,8 @@ export default function Messages() {
                 <View style={s.sectionHead}>
                   <Text style={s.sectionTitle}>Your turn ({yourTurn.length})</Text>
                 </View>
-                {yourTurn.map((m, i) => (
-                  <TouchableOpacity key={m.id} style={[s.chatRow, i < yourTurn.length - 1 && s.chatRowBorder]} onPress={() => openChat(m)} activeOpacity={0.8}>
+                {yourTurn.map(m => (
+                  <TouchableOpacity key={m.id} style={s.chatRow} onPress={() => openChat(m)} activeOpacity={0.8}>
                     <Avatar photo={m.photo} name={m.name} online={m.online} />
                     <View style={s.chatInfo}>
                       <Text style={s.chatName}>{m.name}</Text>
@@ -176,8 +179,8 @@ export default function Messages() {
                 <View style={s.sectionHead}>
                   <Text style={s.sectionTitle}>Their turn ({theirTurn.length})</Text>
                 </View>
-                {theirTurn.map((m, i) => (
-                  <TouchableOpacity key={m.id} style={[s.chatRow, i < theirTurn.length - 1 && s.chatRowBorder]} onPress={() => openChat(m)} activeOpacity={0.8}>
+                {theirTurn.map(m => (
+                  <TouchableOpacity key={m.id} style={s.chatRow} onPress={() => openChat(m)} activeOpacity={0.8}>
                     <Avatar photo={m.photo} name={m.name} />
                     <View style={s.chatInfo}>
                       <Text style={s.chatName}>{m.name}</Text>
@@ -202,7 +205,7 @@ const s = StyleSheet.create({
   bellBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 6, shadowOffset: { width: 0, height: 1 }, elevation: 2, position: 'relative' },
   bellDot: { position: 'absolute', top: 7, right: 7, width: 8, height: 8, borderRadius: 4, backgroundColor: '#FF4D6A', borderWidth: 2, borderColor: colors.canvas },
 
-  whiteCard: { flex: 1, backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20 },
+  whiteCard: { flex: 1, backgroundColor: colors.canvas },
 
   empty: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingTop: 80, gap: 8 },
   emptyTitle: { fontFamily: 'SpaceGrotesk_700Bold', fontSize: 18, color: colors.ink, textAlign: 'center' },
@@ -217,8 +220,11 @@ const s = StyleSheet.create({
   newMatchItem: { alignItems: 'center', gap: 6 },
   newMatchName: { fontFamily: 'HankenGrotesk_600SemiBold', fontSize: 11, color: colors.ink },
 
-  chatRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14 },
-  chatRowBorder: { borderBottomWidth: 1, borderBottomColor: '#F0F1F5' },
+  chatRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: '#fff', borderRadius: 16, padding: 14, marginBottom: 10,
+    shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2,
+  },
   chatInfo: { flex: 1, minWidth: 0 },
   chatName: { fontFamily: 'SpaceGrotesk_700Bold', fontSize: 15, color: colors.ink, marginBottom: 3 },
   chatMsg: { fontFamily: 'HankenGrotesk_600SemiBold', fontSize: 13, color: colors.ink },
