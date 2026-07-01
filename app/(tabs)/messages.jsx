@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView, Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 import { colors } from '../../lib/theme';
 import { getBlockedIds } from '../../lib/blocks';
@@ -48,9 +48,11 @@ export default function Messages() {
   const [theirTurn, setTheirTurn] = useState(DEMO_THEIR_TURN);
   const [loading, setLoading] = useState(true);
   const [hasUnread] = useState(false);
+  const hasLoadedOnce = useRef(false);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     async function load() {
+      if (!hasLoadedOnce.current) setLoading(true);
       try {
         const { data: authData } = await supabase.auth.getUser();
         const uid = authData?.user?.id;
@@ -101,13 +103,14 @@ export default function Messages() {
       } catch (_) {}
       finally {
         setLoading(false);
+        hasLoadedOnce.current = true;
       }
     }
     load();
-  }, []);
+  }, []));
 
   function openChat(match) {
-    router.push({ pathname: '/(tabs)/chat', params: { name: match.name, matchId: match.id ?? '' } });
+    router.push({ pathname: '/(tabs)/chat', params: { name: match.name, photo: match.photo ?? '', matchId: match.id ?? '' } });
   }
 
   const isEmpty = newMatches.length === 0 && yourTurn.length === 0 && theirTurn.length === 0;

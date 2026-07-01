@@ -404,8 +404,9 @@ export default function Likes() {
         onChat={() => {
           const d = matchData;
           const n = d.like.profiles?.name ?? '';
+          const ph = d.like.profiles?.photos?.[0] ?? '';
           setMatchData(null);
-          router.push({ pathname: '/(tabs)/chat', params: { name: n, matchId: d.matchId, prefill: `Hey ${n}! Really excited to match with you on Venn 👋 Still looking for a flatmate?` } });
+          router.push({ pathname: '/(tabs)/chat', params: { name: n, photo: ph, matchId: d.matchId, prefill: `Hey ${n}! Really excited to match with you on Venn 👋 Still looking for a flatmate?` } });
         }}
         onDismiss={() => setMatchData(null)}
       />

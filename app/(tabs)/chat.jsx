@@ -139,7 +139,14 @@ export default function Chat() {
             <Text style={s.emptyText}>Say hi to {displayName} 👋</Text>
           ) : messages.map(msg => (
             <View key={msg.id} style={[s.msgRow, msg.mine && s.msgRowMine]}>
-              {!msg.mine && <View style={s.msgAvatar}><Text style={s.msgAvatarText}>{(displayName[0] ?? '?').toUpperCase()}</Text></View>}
+              {!msg.mine && (
+                <View style={s.msgAvatar}>
+                  {photo
+                    ? <Image source={{ uri: photo }} style={{ width: '100%', height: '100%', borderRadius: 14 }} resizeMode="cover" />
+                    : <Text style={s.msgAvatarText}>{(displayName[0] ?? '?').toUpperCase()}</Text>
+                  }
+                </View>
+              )}
               <View style={{ maxWidth: '72%' }}>
                 <View style={[s.bubble, msg.mine ? s.bubbleMine : s.bubbleThem]}>
                   <Text style={[s.bubbleText, msg.mine && s.bubbleTextMine]}>{msg.content}</Text>

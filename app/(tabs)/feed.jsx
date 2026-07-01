@@ -962,7 +962,7 @@ export default function Feed() {
         onMessage={() => {
           const m = matchModal;
           setMatchModal(null);
-          router.push({ pathname: '/(tabs)/chat', params: { name: m.name, matchId: m.matchId } });
+          router.push({ pathname: '/(tabs)/chat', params: { name: m.name, photo: m.photo ?? '', matchId: m.matchId } });
         }}
         onClose={() => setMatchModal(null)}
       />
