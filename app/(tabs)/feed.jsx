@@ -696,8 +696,13 @@ export default function Feed() {
     setBannerDismissed(true);
     setShowPrefs(false);
     savingPrefsRef.current = true;
-    await savePrefsToSupabase(draft);
-    savingPrefsRef.current = false;
+    try {
+      await savePrefsToSupabase(draft);
+    } catch (e) {
+      Alert.alert('Could not save preferences', e.message);
+    } finally {
+      savingPrefsRef.current = false;
+    }
   }
 
   function handleQuickSave(key, val) {
@@ -705,7 +710,9 @@ export default function Feed() {
     setPrefs(updated);
     setBannerDismissed(true);
     savingPrefsRef.current = true;
-    savePrefsToSupabase(updated).finally(() => { savingPrefsRef.current = false; });
+    savePrefsToSupabase(updated)
+      .catch(e => Alert.alert('Could not save preferences', e.message))
+      .finally(() => { savingPrefsRef.current = false; });
   }
 
   useFocusEffect(useCallback(() => {

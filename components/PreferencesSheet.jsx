@@ -92,25 +92,24 @@ export function isPrefSet(prefs, key, multi) {
 }
 
 export async function savePrefsToSupabase(p) {
-  try {
-    const { data: authData } = await supabase.auth.getUser();
-    const uid = authData?.user?.id;
-    if (!uid) return;
-    await supabase.from('profiles').update({
-      pref_role:       p.role       ?? null,
-      pref_areas:      p.areas?.length      ? p.areas      : null,
-      pref_flat_type:  p.flatType?.length    ? p.flatType   : null,
-      pref_budget:     p.budget     ?? null,
-      pref_move_in:    p.moveIn     ?? null,
-      pref_gender:     p.gender     ?? null,
-      pref_age:        p.age        ?? null,
-      pref_occupation: p.occupation?.length  ? p.occupation : null,
-      pref_food:       p.food?.length        ? p.food       : null,
-      pref_smoking:    p.smoking    ?? null,
-      pref_drinking:   p.drinking   ?? null,
-      pref_pets:       p.pets?.length        ? p.pets       : null,
-    }).eq('id', uid);
-  } catch (_) {}
+  const { data: authData } = await supabase.auth.getUser();
+  const uid = authData?.user?.id;
+  if (!uid) return;
+  const { error } = await supabase.from('profiles').update({
+    pref_role:       p.role       ?? null,
+    pref_areas:      p.areas?.length      ? p.areas      : null,
+    pref_flat_type:  p.flatType?.length    ? p.flatType   : null,
+    pref_budget:     p.budget     ?? null,
+    pref_move_in:    p.moveIn     ?? null,
+    pref_gender:     p.gender     ?? null,
+    pref_age:        p.age        ?? null,
+    pref_occupation: p.occupation?.length  ? p.occupation : null,
+    pref_food:       p.food?.length        ? p.food       : null,
+    pref_smoking:    p.smoking    ?? null,
+    pref_drinking:   p.drinking   ?? null,
+    pref_pets:       p.pets?.length        ? p.pets       : null,
+  }).eq('id', uid);
+  if (error) throw error;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────

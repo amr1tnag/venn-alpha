@@ -321,7 +321,11 @@ export default function Likes() {
   async function handleSavePrefs(draft) {
     setPrefs(draft);
     setShowPrefs(false);
-    savePrefsToSupabase(draft);
+    try {
+      await savePrefsToSupabase(draft);
+    } catch (e) {
+      Alert.alert('Could not save preferences', e.message);
+    }
   }
 
   async function handleLikeBack(like) {
