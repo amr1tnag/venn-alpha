@@ -1,9 +1,8 @@
 {
   "buildCommand": "npx expo export --platform web && node scripts/inject-html-meta.js && cp signup.html dist/signup.html",
   "outputDirectory": "dist",
-  "routes": [
-    { "src": "^/$", "dest": "/signup.html" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/" }
+  "rewrites": [
+    { "source": "/", "destination": "/signup.html" },
+    { "source": "/(.*)", "destination": "/" }
   ]
 }
