@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   ScrollView, TextInput, KeyboardAvoidingView, Platform, Image, Animated, Alert,
+  Modal, Pressable,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +10,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 import { colors } from '../../lib/theme';
 import { activeStatusText } from '../../lib/presence';
+import { blockUser } from '../../lib/blocks';
+import { unmatchUser } from '../../lib/matches';
+import ReportSheet from '../../components/ReportSheet';
 
 const DEMO_MESSAGES = [
   { id: '1', content: "Hey! Saw your profile — really liked your vibe 😊", mine: false, time: '10:32 AM' },
@@ -26,10 +30,14 @@ export default function Chat() {
   const [loadingMsgs, setLoadingMsgs] = useState(!!matchId);
   const [text, setText] = useState(prefill ?? '');
   const [otherStatus, setOtherStatus] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [reportVisible, setReportVisible] = useState(false);
   const scrollRef = useRef(null);
   const displayName = name ?? 'Chat';
   const sendScale = useRef(new Animated.Value(1)).current;
   const otherLastActiveRef = useRef(null);
+  const otherIdRef = useRef(null);
+  const uidRef = useRef(null);
 
   function animateSend() {
     Animated.sequence([
@@ -56,11 +64,13 @@ export default function Chat() {
       try {
         const { data: authData } = await supabase.auth.getUser();
         uid = authData?.user?.id;
+        uidRef.current = uid;
 
         const { data: matchRow } = await supabase
           .from('matches').select('user1_id, user2_id').eq('id', matchId).single();
         if (matchRow) {
           otherId = matchRow.user1_id === uid ? matchRow.user2_id : matchRow.user1_id;
+          otherIdRef.current = otherId;
           const { data: otherProfile } = await supabase
             .from('profiles').select('last_active_at').eq('id', otherId).single();
           otherLastActiveRef.current = otherProfile?.last_active_at ?? null;
@@ -117,6 +127,44 @@ export default function Chat() {
     return () => { supabase.removeChannel(channel); clearInterval(statusInterval); };
   }, [matchId]);
 
+  function confirmUnmatch() {
+    Alert.alert(
+      `Unmatch ${displayName}?`,
+      "This removes the match and deletes your conversation. This can't be undone.",
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Unmatch', style: 'destructive', onPress: doUnmatch },
+      ],
+    );
+  }
+
+  async function doUnmatch() {
+    if (!matchId) return;
+    const { error } = await unmatchUser(matchId);
+    if (error) { Alert.alert('Could not unmatch', error.message); return; }
+    router.back();
+  }
+
+  function confirmBlock() {
+    Alert.alert(
+      `Block ${displayName}?`,
+      "You won't see each other on Venn anymore, and this chat will be removed.",
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Block', style: 'destructive', onPress: doBlock },
+      ],
+    );
+  }
+
+  async function doBlock() {
+    const uid = uidRef.current;
+    const otherId = otherIdRef.current;
+    if (!uid || !otherId) return;
+    const { error } = await blockUser(uid, otherId);
+    if (error) { Alert.alert('Could not block', error.message); return; }
+    router.back();
+  }
+
   async function send() {
     const trimmed = text.trim();
     if (!trimmed) return;
@@ -159,15 +207,46 @@ export default function Chat() {
             </View>
             <View>
               <Text style={s.headerName}>{displayName}</Text>
-              <Text style={[s.headerStatus, otherStatus && !otherStatus.startsWith('Active now') && s.headerStatusOffline]}>
-                {otherStatus ?? 'Active now'}
-              </Text>
+              {otherStatus && (
+                <Text style={[s.headerStatus, !otherStatus.startsWith('Active now') && s.headerStatusOffline]}>
+                  {otherStatus}
+                </Text>
+              )}
             </View>
           </View>
-          <TouchableOpacity style={s.moreBtn} activeOpacity={0.7}>
+          <TouchableOpacity style={s.moreBtn} activeOpacity={0.7} onPress={() => setMenuOpen(true)}>
             <Ionicons name="ellipsis-vertical" size={18} color={colors.ink} />
           </TouchableOpacity>
         </View>
+
+        <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={() => setMenuOpen(false)}>
+          <Pressable style={[s.menuBackdrop, { paddingTop: insets.top + 60 }]} onPress={() => setMenuOpen(false)}>
+            <View style={s.menuBox}>
+              <TouchableOpacity style={s.menuItem} activeOpacity={0.7} onPress={() => { setMenuOpen(false); confirmUnmatch(); }}>
+                <Ionicons name="heart-dislike-outline" size={16} color={colors.ink} />
+                <Text style={s.menuItemText}>Unmatch</Text>
+              </TouchableOpacity>
+              <View style={s.menuDivider} />
+              <TouchableOpacity style={s.menuItem} activeOpacity={0.7} onPress={() => { setMenuOpen(false); confirmBlock(); }}>
+                <Ionicons name="ban-outline" size={16} color={colors.ink} />
+                <Text style={s.menuItemText}>Block</Text>
+              </TouchableOpacity>
+              <View style={s.menuDivider} />
+              <TouchableOpacity style={s.menuItem} activeOpacity={0.7} onPress={() => { setMenuOpen(false); setReportVisible(true); }}>
+                <Ionicons name="flag-outline" size={16} color="#FF4D6A" />
+                <Text style={[s.menuItemText, { color: '#FF4D6A' }]}>Report</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Modal>
+
+        <ReportSheet
+          visible={reportVisible}
+          targetId={otherIdRef.current}
+          targetName={displayName}
+          onClose={() => setReportVisible(false)}
+          onSubmitted={() => Alert.alert('Report submitted', "Thanks — we'll review it.")}
+        />
 
         <ScrollView
           ref={scrollRef}
@@ -247,6 +326,20 @@ const s = StyleSheet.create({
   headerStatus: { fontFamily: 'HankenGrotesk_400Regular', fontSize: 12, color: '#22C55E' },
   headerStatusOffline: { color: '#9AA0B2' },
   moreBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+
+  menuBackdrop: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'flex-start', alignItems: 'flex-end',
+    paddingRight: 16,
+  },
+  menuBox: {
+    backgroundColor: '#fff', borderRadius: 14, minWidth: 160,
+    shadowColor: '#000', shadowOpacity: 0.14, shadowRadius: 24, shadowOffset: { width: 0, height: 4 },
+    elevation: 8, overflow: 'hidden',
+  },
+  menuItem: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 14, paddingHorizontal: 16 },
+  menuItemText: { fontFamily: 'HankenGrotesk_400Regular', fontSize: 14, color: colors.ink },
+  menuDivider: { height: 1, backgroundColor: '#F0F1F5' },
 
   messages: { flex: 1 },
   messagesContent: { padding: 16, gap: 12, paddingBottom: 8 },

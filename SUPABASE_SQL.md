@@ -361,3 +361,17 @@ CREATE POLICY "messages_update_read" ON messages
     )
   );
 ```
+
+---
+
+## 13. Unmatch
+
+`matches` only had a `SELECT` policy, so nothing could ever delete a match. This
+adds a `DELETE` policy so either participant can unmatch; `messages` and
+`notifications` already cascade-delete via `ON DELETE CASCADE` on `match_id`,
+so removing the `matches` row is enough to clean up the whole conversation.
+
+```sql
+CREATE POLICY "matches_delete" ON matches
+  FOR DELETE USING (auth.uid() = user1_id OR auth.uid() = user2_id);
+```
