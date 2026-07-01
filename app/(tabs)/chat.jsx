@@ -117,8 +117,14 @@ export default function Chat() {
 
     load();
 
-    const statusInterval = setInterval(() => {
-      if (otherLastActiveRef.current) setOtherStatus(activeStatusText(otherLastActiveRef.current));
+    const statusInterval = setInterval(async () => {
+      if (!otherIdRef.current) return;
+      // Re-fetch, not just re-render off the cached value — otherwise an open
+      // chat never notices the other person going online/offline mid-session.
+      const { data: otherProfile } = await supabase
+        .from('profiles').select('last_active_at').eq('id', otherIdRef.current).single();
+      otherLastActiveRef.current = otherProfile?.last_active_at ?? otherLastActiveRef.current;
+      setOtherStatus(activeStatusText(otherLastActiveRef.current));
     }, 30000);
 
     const channel = supabase
@@ -227,7 +233,7 @@ export default function Chat() {
 
   async function doUnmatch() {
     if (!matchId) return;
-    const { error } = await unmatchUser(matchId);
+    const { error } = await unmatchUser(matchId, uidRef.current, otherIdRef.current);
     if (error) { Alert.alert('Could not unmatch', error.message); return; }
     router.back();
   }

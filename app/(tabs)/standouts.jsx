@@ -238,7 +238,8 @@ export default function Standouts() {
       const uid = authData?.user?.id;
       if (!uid) return;
       const { error } = await supabase.from('likes').insert({ from_user_id: uid, to_user_id: keyTargetId, comment: keyNote || null });
-      if (error) Alert.alert('Could not send', error.message);
+      // Already sent a Key to this person (unique constraint) — not an error.
+      if (error && error.code !== '23505') Alert.alert('Could not send', error.message);
     } catch (e) {
       Alert.alert('Could not send', e.message);
     }

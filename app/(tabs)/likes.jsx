@@ -335,7 +335,8 @@ export default function Likes() {
       const uid = authData?.user?.id;
       if (!uid) return;
       const { error: likeError } = await supabase.from('likes').insert({ from_user_id: uid, to_user_id: like.from_user_id });
-      if (likeError) { Alert.alert('Could not like back', likeError.message); return; }
+      // Already liked (unique constraint) — fall through to the match check below.
+      if (likeError && likeError.code !== '23505') { Alert.alert('Could not like back', likeError.message); return; }
       const u1 = uid < like.from_user_id ? uid : like.from_user_id;
       const u2 = uid < like.from_user_id ? like.from_user_id : uid;
       const { data: match } = await supabase

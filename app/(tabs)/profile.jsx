@@ -1226,7 +1226,7 @@ export default function Profile() {
           <TouchableOpacity style={[p.tabPill, activeTab === 'safety' && p.tabPillActive]} onPress={() => setActiveTab('safety')} activeOpacity={0.8}>
             <Text style={[p.tabPillText, activeTab === 'safety' && p.tabPillTextActive]}>Safety</Text>
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.85}>
+          <TouchableOpacity activeOpacity={0.85} onPress={() => Alert.alert('Venn+', "Coming soon — we're still building this.")}>
             <LinearGradient colors={['#335CFF', '#8A5BFF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={p.vennPlusTab}>
               <Ionicons name="add" size={12} color="#fff" />
               <Text style={p.vennPlusText}>Venn+</Text>

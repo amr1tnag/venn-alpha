@@ -375,3 +375,113 @@ so removing the `matches` row is enough to clean up the whole conversation.
 CREATE POLICY "matches_delete" ON matches
   FOR DELETE USING (auth.uid() = user1_id OR auth.uid() = user2_id);
 ```
+
+---
+
+## 14. SECURITY — profiles has no RLS at all
+
+**Run this immediately.** Every other table in this file gets `ENABLE ROW LEVEL
+SECURITY` plus policies, but `profiles` never does — it only ever shows up as
+`ALTER TABLE profiles ADD COLUMN ...`. Since this app talks to Supabase
+directly from the client with the public anon key, RLS is the *only* thing
+stopping a malicious authenticated user from crafting a raw request. Without
+it, anyone can currently run something like:
+
+```js
+supabase.from('profiles').update({ verified: true, user_type: 'owner' }).eq('id', someoneElsesId)
+```
+
+and silently tamper with any other user's profile — fake a verified badge,
+overwrite their photos/prompts, flip their account type, etc. — none of which
+the app's own UI would ever do, but nothing stops a request that doesn't go
+through the UI.
+
+```sql
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- Browsing other users' profiles (feed/standouts/likes) requires reading
+-- rows other than your own, so SELECT stays open to any signed-in user.
+CREATE POLICY "profiles_select" ON profiles
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+-- The critical fix: you can only ever modify your OWN row.
+CREATE POLICY "profiles_update_own" ON profiles
+  FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+```
+
+Note: this does not lock down which *columns* other users can read (e.g. your
+own `pref_*` matching preferences are technically selectable by anyone once
+SELECT is open at the row level) — Postgres RLS is row-level, not
+column-level. That's a lower-severity, separate hardening step (would need
+column-level `GRANT`s) and is out of scope here; the row-level UPDATE hole
+above is the one that actually lets one account tamper with another's data.
+
+---
+
+## 15. SECURITY — messages_update_read allows rewriting message content, not just `read`
+
+The policy added in §12 only checks match membership in `USING`/`WITH CHECK` —
+it never restricts *which* columns can change. As written, either participant
+can currently run:
+
+```js
+supabase.from('messages').update({ content: 'fabricated text', sender_id: otherUserId }).eq('id', someMessageId)
+```
+
+and rewrite the other person's messages in their own chat history. RLS can't
+restrict this to a single column on its own — that needs a column-level
+`GRANT`, which takes priority over the broader table grant Supabase sets up by
+default:
+
+```sql
+REVOKE UPDATE ON messages FROM authenticated;
+GRANT UPDATE (read) ON messages TO authenticated;
+
+-- Tighten while we're here: only the recipient (not the sender) should ever
+-- need to flip `read` — a sender marking their own message read is harmless,
+-- but there's no legitimate reason to allow it.
+DROP POLICY IF EXISTS "messages_update_read" ON messages;
+CREATE POLICY "messages_update_read" ON messages
+  FOR UPDATE USING (
+    sender_id != auth.uid() AND
+    EXISTS (
+      SELECT 1 FROM matches
+      WHERE id = messages.match_id
+        AND (user1_id = auth.uid() OR user2_id = auth.uid())
+    )
+  ) WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM matches
+      WHERE id = messages.match_id
+        AND (user1_id = auth.uid() OR user2_id = auth.uid())
+    )
+  );
+```
+
+---
+
+## 16. Defense in depth — messages between blocked users
+
+The app now deletes the `matches` row when one user blocks another (which
+cascades away the messages), but that relies on the client actually doing it.
+This adds a DB-level backstop so even a raw API call can't insert a message
+between a blocked pair, regardless of whether a stale `matches` row exists:
+
+```sql
+DROP POLICY IF EXISTS "messages_insert" ON messages;
+CREATE POLICY "messages_insert" ON messages
+  FOR INSERT WITH CHECK (
+    auth.uid() = sender_id AND
+    EXISTS (
+      SELECT 1 FROM matches m
+      WHERE m.id = messages.match_id
+        AND (m.user1_id = auth.uid() OR m.user2_id = auth.uid())
+    ) AND NOT EXISTS (
+      SELECT 1 FROM matches m
+      JOIN blocks b ON
+        (b.blocker_id = m.user1_id AND b.blocked_id = m.user2_id) OR
+        (b.blocker_id = m.user2_id AND b.blocked_id = m.user1_id)
+      WHERE m.id = messages.match_id
+    )
+  );
+```

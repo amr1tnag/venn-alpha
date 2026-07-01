@@ -673,7 +673,8 @@ export default function Feed() {
       const uid = uidRef.current;
       if (!uid) return;
       const { error: likeError } = await supabase.from('likes').insert({ from_user_id: uid, to_user_id: p.id, comment: likeComment.trim() || null });
-      if (likeError) { Alert.alert('Could not send like', likeError.message); return; }
+      // Already liked (unique constraint) — fall through to the match check below.
+      if (likeError && likeError.code !== '23505') { Alert.alert('Could not send like', likeError.message); return; }
       // Requires a DB trigger: when both users have liked each other, insert a row
       // into matches(user1_id, user2_id) where user1_id < user2_id.
       const u1 = uid < p.id ? uid : p.id;
@@ -722,9 +723,17 @@ export default function Feed() {
       if (!uid) return;
       const { data: me } = await supabase
         .from('profiles')
-        .select('pref_role,pref_areas,pref_flat_type,pref_budget,pref_move_in,pref_gender,pref_age,pref_occupation,pref_food,pref_smoking,pref_drinking,pref_pets')
+        .select('name,photos,pref_role,pref_areas,pref_flat_type,pref_budget,pref_move_in,pref_gender,pref_age,pref_occupation,pref_food,pref_smoking,pref_drinking,pref_pets')
         .eq('id', uid)
         .single();
+      if (me) {
+        // Keep the match-celebration modal's "you" avatar in sync with the
+        // latest saved photo/name, not just whatever was true on first mount.
+        myInfoRef.current = {
+          name: me.name ?? 'You',
+          photo: Array.isArray(me.photos) ? me.photos[0] ?? null : null,
+        };
+      }
       // Skip if a save triggered from this screen is still in flight — otherwise
       // a quick-focus-away-and-back can overwrite the just-applied local prefs
       // with the not-yet-updated DB row.
