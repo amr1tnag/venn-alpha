@@ -11,20 +11,6 @@ import { getBlockedIds } from '../../lib/blocks';
 import { getUnreadCount } from '../../lib/notifications';
 import { isOnline } from '../../lib/presence';
 
-const DEMO_NEW = [
-  { id: 'n1', name: 'Kavya', photo: null },
-  { id: 'n2', name: 'Ishaan', photo: null },
-];
-
-const DEMO_YOUR_TURN = [
-  { id: 'y1', name: 'Priya', photo: null, lastMsg: "I have a 2BHK in Bandra West, looking for a flatmate 🙂", online: true },
-  { id: 'y2', name: 'Meera', photo: null, lastMsg: "Sounds amazing, I'd love a balcony too! 🌿", online: false },
-];
-
-const DEMO_THEIR_TURN = [
-  { id: 't1', name: 'Ananya', photo: null, lastMsg: "You: Open to anywhere central. What about you?", online: false },
-];
-
 function Avatar({ photo, name, size = 52, online = false }) {
   const initials = (name ?? '?')[0].toUpperCase();
   return (
@@ -45,9 +31,9 @@ function Avatar({ photo, name, size = 52, online = false }) {
 export default function Messages() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [newMatches, setNewMatches] = useState(DEMO_NEW);
-  const [yourTurn, setYourTurn] = useState(DEMO_YOUR_TURN);
-  const [theirTurn, setTheirTurn] = useState(DEMO_THEIR_TURN);
+  const [newMatches, setNewMatches] = useState([]);
+  const [yourTurn, setYourTurn] = useState([]);
+  const [theirTurn, setTheirTurn] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasUnread, setHasUnread] = useState(false);
   const hasLoadedOnce = useRef(false);
@@ -58,7 +44,10 @@ export default function Messages() {
       try {
         const { data: authData } = await supabase.auth.getUser();
         const uid = authData?.user?.id;
-        if (!uid) return;
+        if (!uid) {
+          setNewMatches([]); setYourTurn([]); setTheirTurn([]);
+          return;
+        }
 
         getUnreadCount(uid).then(count => setHasUnread(count > 0));
 

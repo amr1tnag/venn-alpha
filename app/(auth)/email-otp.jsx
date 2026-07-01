@@ -53,8 +53,21 @@ export default function EmailOtp() {
   async function handleVerify() {
     setLoading(true);
     const token = otp.join('');
-    const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
-    if (error) { shake(); Alert.alert('Error', error.message); }
+    const { data, error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
+    if (error) {
+      shake();
+      Alert.alert('Error', error.message);
+      setLoading(false);
+      return;
+    }
+    // Navigate directly instead of relying solely on _layout's auth-state
+    // listener to redirect — that listener can race with this screen and
+    // leave the user stuck here until a manual reload.
+    const uid = data?.session?.user?.id;
+    if (uid) {
+      const { data: p } = await supabase.from('profiles').select('onboarding_done').eq('id', uid).single();
+      router.replace(p?.onboarding_done ? '/(tabs)/feed' : '/(onboarding)/name');
+    }
     setLoading(false);
   }
 
