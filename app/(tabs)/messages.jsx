@@ -93,6 +93,7 @@ export default function Messages() {
           const otherId = match.user1_id === uid ? match.user2_id : match.user1_id;
           if (blockedIds.has(otherId)) return;
           const p = profileMap[otherId];
+          if (!p?.name) return; // incomplete/broken profile — don't surface a "?" chat
           const entry = {
             id: match.id, name: p?.name ?? '?',
             photo: Array.isArray(p?.photos) ? p.photos[0] ?? null : null,
