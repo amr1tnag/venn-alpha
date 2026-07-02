@@ -401,28 +401,12 @@ export default function Standouts() {
               <Ionicons name="location-outline" size={13} color="rgba(255,255,255,0.6)" />
               <Text style={s.areaText}>{profile.area}</Text>
             </View>
-            {/* Prompt card with inline 🔑 button */}
+            {/* Prompt card */}
             <View style={s.promptCard}>
               <Text style={s.promptQ}>{profile.prompt}</Text>
-              <Text style={[s.promptA, { paddingBottom: 36 }]}>{profile.answer}</Text>
-              <TouchableOpacity
-                style={s.keyOverlayBtn}
-                onPress={() => openKeySheet(profile.name, profile.id)}
-                activeOpacity={0.85}
-              >
-                <Text style={{ fontSize: 18 }}>🔑</Text>
-              </TouchableOpacity>
+              <Text style={s.promptA}>{profile.answer}</Text>
             </View>
           </View>
-
-          {/* 🔑 button on photo (bottom-right) */}
-          <TouchableOpacity
-            style={s.photoKeyBtn}
-            onPress={() => openKeySheet(profile.name, profile.id)}
-            activeOpacity={0.85}
-          >
-            <Text style={{ fontSize: 18 }}>🔑</Text>
-          </TouchableOpacity>
         </Animated.View>
       </View>
 
@@ -471,26 +455,18 @@ export default function Standouts() {
                   <Ionicons name="ellipsis-vertical" size={14} color="#fff" />
                 </TouchableOpacity>
               </View>
-              <View style={{ flexDirection: 'row', gap: 10 }}>
-                <TouchableOpacity
-                  style={s.profilePassCircle}
-                  onPress={() => { setShowProfile(false); advanceCard(false); }}
-                >
-                  <Ionicons name="close" size={20} color="#FF4D6A" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={s.profileKeyCircle}
-                  onPress={() => { setShowProfile(false); openKeySheet(profile.name, profile.id); }}
-                >
-                  <Text style={{ fontSize: 18 }}>🔑</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                style={s.profilePassCircle}
+                onPress={() => { setShowProfile(false); advanceCard(false); }}
+              >
+                <Ionicons name="close" size={20} color="#FF4D6A" />
+              </TouchableOpacity>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 8 }}>
               <View style={{ padding: 14, paddingTop: 0, paddingBottom: 24 }}>
 
-                {/* Hero photo with 🔑 button bottom-right */}
+                {/* Hero photo */}
                 <View style={s.heroWrap}>
                   <Image source={{ uri: profile.photo }} style={s.heroImg} resizeMode="cover" />
                   <LinearGradient
@@ -509,14 +485,6 @@ export default function Standouts() {
                       )}
                     </View>
                   </View>
-                  {/* 🔑 on hero photo */}
-                  <TouchableOpacity
-                    style={s.heroKeyBtn}
-                    onPress={() => { setShowProfile(false); openKeySheet(profile.name, profile.id); }}
-                    activeOpacity={0.85}
-                  >
-                    <Text style={{ fontSize: 18 }}>🔑</Text>
-                  </TouchableOpacity>
                 </View>
 
                 {/* Flat photos — everything after the profile picture in the photos array */}
@@ -558,31 +526,17 @@ export default function Standouts() {
                   ))}
                 </View>
 
-                {/* Main prompt with 🔑 button */}
+                {/* Main prompt */}
                 <View style={s.profilePromptWrap}>
                   <Text style={s.profilePromptQ}>{profile.prompt}</Text>
-                  <Text style={[s.profilePromptA, { paddingBottom: 36 }]}>"{profile.answer}"</Text>
-                  <TouchableOpacity
-                    style={s.promptKeyBtn}
-                    onPress={() => { setShowProfile(false); openKeySheet(profile.name, profile.id); }}
-                    activeOpacity={0.85}
-                  >
-                    <Text style={{ fontSize: 18 }}>🔑</Text>
-                  </TouchableOpacity>
+                  <Text style={s.profilePromptA}>"{profile.answer}"</Text>
                 </View>
 
-                {/* Extra prompts with 🔑 button each */}
+                {/* Extra prompts */}
                 {profile.extraPrompts.map(ep => (
                   <View key={ep.q} style={s.profilePromptWrap}>
                     <Text style={s.profilePromptQ}>{ep.q}</Text>
-                    <Text style={[s.profilePromptA, { paddingBottom: 36 }]}>"{ep.a}"</Text>
-                    <TouchableOpacity
-                      style={s.promptKeyBtn}
-                      onPress={() => { setShowProfile(false); openKeySheet(profile.name, profile.id); }}
-                      activeOpacity={0.85}
-                    >
-                      <Text style={{ fontSize: 18 }}>🔑</Text>
-                    </TouchableOpacity>
+                    <Text style={s.profilePromptA}>"{ep.a}"</Text>
                   </View>
                 ))}
 
@@ -710,16 +664,6 @@ const s = StyleSheet.create({
   menuItemText: { fontFamily: 'HankenGrotesk_400Regular', fontSize: 14, color: '#14161B' },
   menuDivider: { height: 1, backgroundColor: '#F0F1F5' },
 
-  // 🔑 button on main card photo (bottom-right, same position as home heart)
-  photoKeyBtn: {
-    position: 'absolute', bottom: 14, right: 14,
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#fff',
-    alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 10, shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
-  },
-
   // Card bottom overlay
   cardBottom: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20, paddingBottom: 18 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
@@ -729,17 +673,10 @@ const s = StyleSheet.create({
   areaRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 12 },
   areaText: { fontFamily: 'HankenGrotesk_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.7)' },
 
-  // Prompt card on main swipe card with inline 🔑 button
+  // Prompt card on main swipe card
   promptCard: { position: 'relative', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 14, padding: 14, paddingHorizontal: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)' },
   promptQ: { fontFamily: 'HankenGrotesk_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: 0.8 },
   promptA: { fontFamily: 'SpaceGrotesk_700Bold', fontSize: 16, fontWeight: '700', color: '#fff', lineHeight: 22 },
-  // 🔑 inside prompt card (bottom-right)
-  keyOverlayBtn: {
-    position: 'absolute', bottom: 10, right: 10,
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    alignItems: 'center', justifyContent: 'center',
-  },
 
   // Dot indicators
   dots: { flexShrink: 0, flexDirection: 'row', justifyContent: 'center', gap: 6, paddingVertical: 10, paddingBottom: 8 },
@@ -761,7 +698,6 @@ const s = StyleSheet.create({
   profileTopBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 14, paddingBottom: 10, backgroundColor: 'rgba(26,26,46,0.95)' },
   closeCircle: { width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
   profilePassCircle: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.08)', borderWidth: 1, borderColor: 'rgba(255,75,106,0.4)', alignItems: 'center', justifyContent: 'center' },
-  profileKeyCircle: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#8A5BFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#8A5BFF', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.5, shadowRadius: 16, elevation: 6 },
 
   // Hero photo
   heroWrap: { borderRadius: 16, overflow: 'hidden', marginBottom: 12, position: 'relative' },
@@ -769,15 +705,6 @@ const s = StyleSheet.create({
   heroInfo: { position: 'absolute', bottom: 20, left: 20, right: 20 },
   heroName: { fontFamily: 'SpaceGrotesk_700Bold', fontSize: 30, fontWeight: '800', color: '#fff', letterSpacing: -0.6 },
   heroAge: { fontFamily: 'HankenGrotesk_400Regular', fontSize: 22, color: 'rgba(255,255,255,0.75)', marginBottom: 2 },
-  // 🔑 on hero photo — same position/style as home page heart button
-  heroKeyBtn: {
-    position: 'absolute', bottom: 14, right: 14,
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#fff',
-    alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 10, shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
-  },
 
   // Flat photos gallery
   gallerySectionLabel: { fontFamily: 'SpaceMono_400Regular', fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 },
@@ -793,7 +720,7 @@ const s = StyleSheet.create({
   infoRowLabel: { fontFamily: 'HankenGrotesk_400Regular', fontSize: 14, color: 'rgba(255,255,255,0.55)', flex: 1 },
   infoRowValue: { fontFamily: 'HankenGrotesk_600SemiBold', fontSize: 14, fontWeight: '600', color: '#fff' },
 
-  // Profile prompts with 🔑 button — same as home page prompt heart
+  // Profile prompts
   profilePromptWrap: {
     position: 'relative',
     backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 16, paddingHorizontal: 18,
@@ -801,13 +728,6 @@ const s = StyleSheet.create({
   },
   profilePromptQ: { fontFamily: 'HankenGrotesk_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.9 },
   profilePromptA: { fontFamily: 'SpaceGrotesk_700Bold', fontSize: 18, fontWeight: '700', color: '#fff', lineHeight: 24 },
-  // 🔑 inside each prompt card
-  promptKeyBtn: {
-    position: 'absolute', bottom: 12, right: 12,
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    alignItems: 'center', justifyContent: 'center',
-  },
 
   // Bottom sheets
   sheetOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
