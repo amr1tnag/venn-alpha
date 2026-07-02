@@ -278,7 +278,7 @@ export default function Likes() {
         const uid = authData?.user?.id;
         if (!uid) return;
 
-        const [{ data: likesData }, { data: me }, blockedIds] = await Promise.all([
+        const [{ data: likesData }, { data: me }, blockedIds, { data: matchRows }] = await Promise.all([
           supabase
             .from('likes')
             .select('id, from_user_id, comment, created_at, profiles!from_user_id(id, name, birthday, gender, photos, preferred_areas, budget, prompts, job_title, job_company, education_school, education_level)')
@@ -290,9 +290,15 @@ export default function Likes() {
             .eq('id', uid)
             .single(),
           getBlockedIds(uid),
+          supabase.from('matches').select('user1_id, user2_id').or(`user1_id.eq.${uid},user2_id.eq.${uid}`),
         ]);
 
-        if (likesData) setLikes(likesData.filter(l => !blockedIds.has(l.from_user_id)));
+        // Someone who already matched with us (we liked them back, or they were
+        // already a match) shouldn't still show up as a pending "like" — they've
+        // moved to chat.
+        const matchedIds = new Set((matchRows ?? []).map(m => m.user1_id === uid ? m.user2_id : m.user1_id));
+
+        if (likesData) setLikes(likesData.filter(l => !blockedIds.has(l.from_user_id) && !matchedIds.has(l.from_user_id)));
         if (me) {
           setPrefs({
             role:       me.pref_role       ?? null,
