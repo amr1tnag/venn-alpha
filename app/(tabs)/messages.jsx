@@ -165,8 +165,8 @@ export default function Messages() {
                     <Avatar photo={m.photo} name={m.name} online={m.online} />
                     <View style={s.chatInfo}>
                       <View style={s.chatNameRow}>
-                        {m.hasNewMsg && <View style={s.newMsgDot} />}
                         <Text style={s.chatName}>{m.name}</Text>
+                        {m.hasNewMsg && <View style={s.newMsgDot} />}
                       </View>
                       <Text style={[s.chatMsg, m.hasNewMsg && s.chatMsgUnread]} numberOfLines={1}>{m.lastMsg}</Text>
                     </View>
@@ -186,8 +186,8 @@ export default function Messages() {
                     <Avatar photo={m.photo} name={m.name} online={m.online} />
                     <View style={s.chatInfo}>
                       <View style={s.chatNameRow}>
-                        {m.hasNewMsg && <View style={s.newMsgDot} />}
                         <Text style={s.chatName}>{m.name}</Text>
+                        {m.hasNewMsg && <View style={s.newMsgDot} />}
                       </View>
                       <Text style={[s.chatMsg, { color: '#9AA0B2' }, m.hasNewMsg && s.chatMsgUnread]} numberOfLines={1}>{m.lastMsg}</Text>
                     </View>

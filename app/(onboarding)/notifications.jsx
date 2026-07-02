@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ImageBackground, View, Text, TouchableOpacity, StyleSheet, Switch, Alert } from 'react-native';
+import { ImageBackground, View, Text, TouchableOpacity, StyleSheet, Switch, Alert, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -65,7 +65,7 @@ export default function Notifications() {
 }
 
 const styles = StyleSheet.create({
-  bg: { flex: 1, backgroundColor: '#000' },
+  bg: { flex: 1, backgroundColor: '#000', ...Platform.select({ web: { height: '100dvh', overflow: 'hidden' } }) },
   overlay: { position: 'absolute', top: '25%', left: 0, right: 0, bottom: 0 },
   content: { flex: 1, paddingHorizontal: 28, justifyContent: 'space-between' },
   top: { gap: 12 },
