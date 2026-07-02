@@ -25,7 +25,7 @@ export default function Login() {
 
   return (
     <View style={styles.frame}>
-      <ImageBackground source={require('../../assets/hero.jpeg')} style={styles.bg} resizeMode="cover">
+      <ImageBackground source={require('../../assets/hero.jpeg')} style={styles.bg} imageStyle={styles.bgImage} resizeMode="cover">
         {/* grain effect */}
         <View style={styles.grain} />
         {/* gradients */}
@@ -85,6 +85,10 @@ const styles = StyleSheet.create({
   // matching width breaks the image's fill sizing on some mobile browsers.
   frame: { flex: 1, ...Platform.select({ web: { height: '100dvh', overflow: 'hidden' } }) },
   bg: { flex: 1, backgroundColor: '#000' },
+  // Forces the inner image layer to fill its box instead of rendering at its
+  // own intrinsic pixel size (which on web can end up narrower than the
+  // screen, showing only a cropped-in window of the photo).
+  bgImage: { width: '100%', height: '100%' },
   grain: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.06)' },
   topFade: { position: 'absolute', top: 0, left: 0, right: 0, height: '22%', backgroundColor: 'rgba(0,0,0,0.28)' },
   bottomFade: { position: 'absolute', top: '42%', left: 0, right: 0, bottom: 0 },

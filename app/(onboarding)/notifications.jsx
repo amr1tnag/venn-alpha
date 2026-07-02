@@ -28,7 +28,7 @@ export default function Notifications() {
 
   return (
     <View style={styles.frame}>
-      <ImageBackground source={require('../../assets/notif-bg.jpeg')} style={styles.bg} resizeMode="cover">
+      <ImageBackground source={require('../../assets/notif-bg.jpeg')} style={styles.bg} imageStyle={styles.bgImage} resizeMode="cover">
         <LinearGradient colors={['transparent', 'rgba(0,0,0,0.88)']} style={styles.overlay} />
 
         <View style={[styles.content, { paddingTop: insets.top + 80, paddingBottom: insets.bottom + 40 }]}>
@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
   // matching width breaks the image's fill sizing on some mobile browsers.
   frame: { flex: 1, ...Platform.select({ web: { height: '100dvh', overflow: 'hidden' } }) },
   bg: { flex: 1, backgroundColor: '#000' },
+  bgImage: { width: '100%', height: '100%' },
   overlay: { position: 'absolute', top: '25%', left: 0, right: 0, bottom: 0 },
   content: { flex: 1, paddingHorizontal: 28, justifyContent: 'space-between' },
   top: { gap: 12 },

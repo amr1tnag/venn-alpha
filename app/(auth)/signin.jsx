@@ -21,7 +21,7 @@ export default function SignIn() {
 
   return (
     <View style={styles.frame}>
-      <ImageBackground source={require('../../assets/hero.jpeg')} style={styles.bg} resizeMode="cover">
+      <ImageBackground source={require('../../assets/hero.jpeg')} style={styles.bg} imageStyle={styles.bgImage} resizeMode="cover">
         <LinearGradient colors={['transparent', 'rgba(0,0,0,0.92)']} style={styles.overlay} />
 
         <TouchableOpacity style={[styles.back, { top: insets.top + 12 }]} onPress={() => router.back()}>
@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
   // matching width breaks the image's fill sizing on some mobile browsers.
   frame: { flex: 1, ...Platform.select({ web: { height: '100dvh', overflow: 'hidden' } }) },
   bg: { flex: 1, backgroundColor: '#111' },
+  bgImage: { width: '100%', height: '100%' },
   overlay: { position: 'absolute', top: '30%', left: 0, right: 0, bottom: 0 },
   back: { position: 'absolute', left: 24, zIndex: 10 },
   backCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
